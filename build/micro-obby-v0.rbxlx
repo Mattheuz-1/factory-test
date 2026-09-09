@@ -1,0 +1,450 @@
+<roblox version="4">
+  <Item class="Lighting" referent="0">
+    <Properties>
+      <string name="Name">Lighting</string>
+      <Color3 name="Ambient">
+        <R>0</R>
+        <G>0</G>
+        <B>0</B>
+      </Color3>
+      <float name="Brightness">2</float>
+      <bool name="GlobalShadows">true</bool>
+      <bool name="Outlines">false</bool>
+      <token name="Technology">1</token>
+    </Properties>
+  </Item>
+  <Item class="ReplicatedStorage" referent="1">
+    <Properties>
+      <string name="Name">ReplicatedStorage</string>
+    </Properties>
+    <Item class="Folder" referent="2">
+      <Properties>
+        <string name="Name">Shared</string>
+      </Properties>
+      <Item class="ModuleScript" referent="3">
+        <Properties>
+          <string name="Name">GameSpec</string>
+          <string name="Source">return {
+	acceptance = {
+		maxDeaths = 0,
+		maxElapsedSeconds = 30,
+		requiresCheckpoint = true,
+		requiresGoal = true,
+	},
+	id = "micro_obby_jump_v0",
+	schemaVersion = 0,
+	test = {
+		enabled = true,
+		sampleIntervalSeconds = 0.1,
+	},
+	world = {
+		checkpoint = {
+			name = "Checkpoint",
+			position = {0, 1, -13},
+			size = {8, 2, 2},
+		},
+		goal = {
+			name = "Goal",
+			position = {0, 1, -19},
+			size = {8, 2, 2},
+		},
+		killPlane = {
+			name = "KillPlane",
+			position = {0, -8, -8},
+			size = {80, 1, 80},
+		},
+		modelName = "GeneratedMicroObby",
+		platforms = {{
+			name = "StartPlatform",
+			position = {0, 0, 0},
+			size = {12, 1, 12},
+		}, {
+			name = "LandingPlatform",
+			position = {0, 0, -16},
+			size = {12, 1, 12},
+		}},
+		removeDefaultBaseplate = true,
+		spawn = {
+			name = "Spawn",
+			position = {0, 1, 2},
+			size = {6, 1, 6},
+		},
+	},
+}</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="4">
+        <Properties>
+          <string name="Name">Hello</string>
+          <string name="Source"><![CDATA[return function()
+	print("Hello, world!")
+end
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="ServerScriptService" referent="5">
+    <Properties>
+      <string name="Name">ServerScriptService</string>
+    </Properties>
+    <Item class="Folder" referent="6">
+      <Properties>
+        <string name="Name">Server</string>
+      </Properties>
+      <Item class="ModuleScript" referent="7">
+        <Properties>
+          <string name="Name">MicroObbyBuilder</string>
+          <string name="Source">local Workspace = game:GetService("Workspace")
+
+local Builder = {}
+
+local function vector3(values)
+return Vector3.new(values[1], values[2], values[3])
+end
+
+local function makePart(parent, definition, role)
+local part = Instance.new("Part")
+
+part.Name = definition.name
+part.Anchored = true
+part.Size = vector3(definition.size)
+part.Position = vector3(definition.position)
+part.Material = Enum.Material.SmoothPlastic
+part:SetAttribute("TestRole", role)
+
+if role == "Checkpoint" then
+part.CanCollide = false
+part.CanTouch = true
+part.Transparency = 0.25
+part.Color = Color3.fromRGB(255, 213, 79)
+elseif role == "Goal" then
+part.CanCollide = false
+part.CanTouch = true
+part.Transparency = 0.25
+part.Color = Color3.fromRGB(80, 220, 120)
+elseif role == "KillPlane" then
+part.CanCollide = false
+part.CanTouch = true
+part.Transparency = 0.5
+part.Color = Color3.fromRGB(220, 70, 70)
+else
+part.CanCollide = true
+part.CanTouch = true
+end
+
+part.Parent = parent
+return part
+end
+
+function Builder.build(spec)
+local worldSpec = spec.world
+
+local existing = Workspace:FindFirstChild(worldSpec.modelName)
+if existing then
+existing:Destroy()
+end
+
+if worldSpec.removeDefaultBaseplate then
+local baseplate = Workspace:FindFirstChild("Baseplate")
+if baseplate then
+baseplate:Destroy()
+end
+end
+
+local model = Instance.new("Model")
+model.Name = worldSpec.modelName
+model.Parent = Workspace
+
+for _, definition in worldSpec.platforms do
+makePart(model, definition, "Platform")
+end
+
+local spawnSpec = worldSpec.spawn
+local spawn = Instance.new("SpawnLocation")
+spawn.Name = spawnSpec.name
+spawn.Anchored = true
+spawn.Size = vector3(spawnSpec.size)
+spawn.Position = vector3(spawnSpec.position)
+spawn.Neutral = true
+spawn.CanCollide = true
+spawn.CanTouch = true
+spawn:SetAttribute("TestRole", "Spawn")
+spawn.Parent = model
+
+makePart(model, worldSpec.checkpoint, "Checkpoint")
+makePart(model, worldSpec.goal, "Goal")
+makePart(model, worldSpec.killPlane, "KillPlane")
+
+return model
+end
+
+return Builder</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="8">
+        <Properties>
+          <string name="Name">TestHooks</string>
+          <string name="Source">local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LogService = game:GetService("LogService")
+
+local TestHooks = {}
+
+local function playerFromHit(hit)
+local character = hit:FindFirstAncestorOfClass("Model")
+if not character then
+return nil
+end
+
+return Players:GetPlayerFromCharacter(character)
+end
+
+local function findRole(world, role)
+for _, instance in world:GetDescendants() do
+if instance:IsA("BasePart")
+and instance:GetAttribute("TestRole") == role then
+return instance
+end
+end
+
+return nil
+end
+
+function TestHooks.start(spec, world)
+if not spec.test.enabled then
+return nil
+end
+
+local previous = ReplicatedStorage:FindFirstChild("TestState")
+if previous then
+previous:Destroy()
+end
+
+local state = Instance.new("Folder")
+state.Name = "TestState"
+state.Parent = ReplicatedStorage
+
+state:SetAttribute("testId", spec.id)
+state:SetAttribute("checkpointReached", false)
+state:SetAttribute("goalReached", false)
+state:SetAttribute("deathCount", 0)
+state:SetAttribute("playerPosition", Vector3.zero)
+state:SetAttribute("elapsedTime", 0)
+state:SetAttribute("activeErrors", 0)
+state:SetAttribute(
+"maxElapsedSeconds",
+spec.acceptance.maxElapsedSeconds
+)
+
+local startedAt = os.clock()
+
+local checkpoint = assert(
+findRole(world, "Checkpoint"),
+"Checkpoint not found"
+)
+
+local goal = assert(
+findRole(world, "Goal"),
+"Goal not found"
+)
+
+local killPlane = assert(
+findRole(world, "KillPlane"),
+"KillPlane not found"
+)
+
+-- Diagnostic only.
+-- External MCP console inspection remains the acceptance oracle for errors.
+LogService.MessageOut:Connect(function(_, messageType)
+if messageType == Enum.MessageType.MessageError then
+local current = state:GetAttribute("activeErrors") or 0
+state:SetAttribute("activeErrors", current + 1)
+end
+end)
+
+local function bindCharacter(character)
+local humanoid = character:WaitForChild("Humanoid", 5)
+
+if not humanoid then
+return
+end
+
+humanoid.Died:Connect(function()
+local current = state:GetAttribute("deathCount") or 0
+state:SetAttribute("deathCount", current + 1)
+print("TEST_DEATH_COUNT", current + 1)
+end)
+end
+
+local function bindPlayer(player)
+if player.Character then
+task.spawn(bindCharacter, player.Character)
+end
+
+player.CharacterAdded:Connect(bindCharacter)
+end
+
+for _, player in Players:GetPlayers() do
+bindPlayer(player)
+end
+
+Players.PlayerAdded:Connect(bindPlayer)
+
+checkpoint.Touched:Connect(function(hit)
+if not playerFromHit(hit) then
+return
+end
+
+if not state:GetAttribute("checkpointReached") then
+state:SetAttribute("checkpointReached", true)
+print("TEST_CHECKPOINT_REACHED")
+end
+end)
+
+goal.Touched:Connect(function(hit)
+if not playerFromHit(hit) then
+return
+end
+
+if spec.acceptance.requiresCheckpoint
+and not state:GetAttribute("checkpointReached") then
+return
+end
+
+if not state:GetAttribute("goalReached") then
+state:SetAttribute("goalReached", true)
+print("TEST_GOAL_REACHED")
+end
+end)
+
+killPlane.Touched:Connect(function(hit)
+local character = hit:FindFirstAncestorOfClass("Model")
+if not character then
+return
+end
+
+local humanoid = character:FindFirstChildOfClass("Humanoid")
+if humanoid and humanoid.Health &gt; 0 then
+humanoid.Health = 0
+end
+end)
+
+task.spawn(function()
+while state.Parent do
+local elapsed = os.clock() - startedAt
+
+state:SetAttribute(
+"elapsedTime",
+math.round(elapsed * 1000) / 1000
+)
+
+local player = Players:GetPlayers()[1]
+
+if player and player.Character then
+local root =
+player.Character:FindFirstChild("HumanoidRootPart")
+
+if root then
+state:SetAttribute("playerPosition", root.Position)
+end
+end
+
+task.wait(spec.test.sampleIntervalSeconds or 0.1)
+end
+end)
+
+print("TEST_HOOKS_READY", spec.id)
+
+return state
+end
+
+return TestHooks</string>
+        </Properties>
+      </Item>
+      <Item class="Script" referent="9">
+        <Properties>
+          <string name="Name">bootstrap</string>
+          <token name="RunContext">0</token>
+          <string name="Source">local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local GameSpec = require(Shared:WaitForChild("GameSpec"))
+
+local MicroObbyBuilder =
+require(script.Parent:WaitForChild("MicroObbyBuilder"))
+
+local TestHooks =
+require(script.Parent:WaitForChild("TestHooks"))
+
+local world = MicroObbyBuilder.build(GameSpec)
+TestHooks.start(GameSpec, world)
+
+print("FACTORY_MICRO_OBBY_READY", GameSpec.id)</string>
+        </Properties>
+      </Item>
+      <Item class="StringValue" referent="10">
+        <Properties>
+          <string name="Name">init.server.luau.disabled</string>
+          <string name="Value"><![CDATA[print("Hello world, from server!")
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="Script" referent="11">
+        <Properties>
+          <string name="Name">verify</string>
+          <token name="RunContext">0</token>
+          <string name="Source">print('ROJO_SYNC_VERIFIED')</string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="SoundService" referent="12">
+    <Properties>
+      <string name="Name">SoundService</string>
+      <bool name="RespectFilteringEnabled">true</bool>
+    </Properties>
+  </Item>
+  <Item class="StarterPlayer" referent="13">
+    <Properties>
+      <string name="Name">StarterPlayer</string>
+    </Properties>
+    <Item class="StarterPlayerScripts" referent="14">
+      <Properties>
+        <string name="Name">StarterPlayerScripts</string>
+      </Properties>
+      <Item class="LocalScript" referent="15">
+        <Properties>
+          <string name="Name">Client</string>
+          <string name="Source"><![CDATA[print("Hello world, from client!")
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="Workspace" referent="16">
+    <Properties>
+      <string name="Name">Workspace</string>
+      <bool name="FilteringEnabled">true</bool>
+      <bool name="NeedsPivotMigration">false</bool>
+    </Properties>
+    <Item class="Part" referent="17">
+      <Properties>
+        <string name="Name">Baseplate</string>
+        <bool name="Anchored">true</bool>
+        <Color3uint8 name="Color3uint8">6512483</Color3uint8>
+        <bool name="Locked">true</bool>
+        <Vector3 name="Position">
+          <X>0</X>
+          <Y>-10</Y>
+          <Z>0</Z>
+        </Vector3>
+        <Vector3 name="size">
+          <X>512</X>
+          <Y>20</Y>
+          <Z>512</Z>
+        </Vector3>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>
