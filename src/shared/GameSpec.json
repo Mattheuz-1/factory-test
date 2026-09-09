@@ -1,58 +1,92 @@
 {
-  "schemaVersion": 0,
-  "id": "micro_obby_jump_v0",
-
-  "test": {
-    "enabled": true,
-    "sampleIntervalSeconds": 0.1
-  },
-
-  "world": {
-    "modelName": "GeneratedMicroObby",
-    "removeDefaultBaseplate": true,
-
-    "platforms": [
-      {
-        "name": "StartPlatform",
-        "size": [12, 1, 12],
-        "position": [0, 0, 0]
-      },
-      {
-        "name": "LandingPlatform",
-        "size": [12, 1, 12],
-        "position": [0, 0, -16]
-      }
-    ],
-
-    "spawn": {
-      "name": "Spawn",
-      "size": [6, 1, 6],
-      "position": [0, 1, 2]
-    },
-
-    "checkpoint": {
-      "name": "Checkpoint",
-      "size": [8, 2, 2],
-      "position": [0, 1, -13]
-    },
-
-    "goal": {
-      "name": "Goal",
-      "size": [8, 2, 2],
-      "position": [0, 1, -19]
-    },
-
-    "killPlane": {
-      "name": "KillPlane",
-      "size": [80, 1, 80],
-      "position": [0, -8, -8]
-    }
-  },
-
-  "acceptance": {
-    "requiresCheckpoint": true,
-    "requiresGoal": true,
-    "maxDeaths": 0,
-    "maxElapsedSeconds": 30
-  }
+    "schemaVersion":  0,
+    "id":  "micro_obby_jump_v0",
+    "test":  {
+                 "enabled":  true,
+                 "sampleIntervalSeconds":  0.1
+             },
+    "world":  {
+                  "modelName":  "GeneratedMicroObby",
+                  "removeDefaultBaseplate":  true,
+                  "platforms":  [
+                                    {
+                                        "name":  "StartPlatform",
+                                        "size":  [
+                                                     12,
+                                                     1,
+                                                     12
+                                                 ],
+                                        "position":  [
+                                                         0,
+                                                         0,
+                                                         0
+                                                     ]
+                                    },
+                                    {
+                                        "name":  "LandingPlatform",
+                                        "size":  [
+                                                     12,
+                                                     1,
+                                                     12
+                                                 ],
+                                        "position":  [
+                                                         0,
+                                                         0,
+                                                         -16
+                                                     ]
+                                    }
+                                ],
+                  "spawn":  {
+                                "name":  "Spawn",
+                                "size":  [
+                                             6,
+                                             1,
+                                             6
+                                         ],
+                                "position":  [
+                                                 0,
+                                                 1,
+                                                 2
+                                             ]
+                            },
+                  "checkpoint":  {
+                                     "name":  "Checkpoint",
+                                     "size":  [
+                                                  8,
+                                                  2,
+                                                  2
+                                              ],
+                                     "position":  [
+                                                      0,
+                                                      1,
+                                                      -13
+                                                  ]
+                                 },
+                  "goal":  {
+                               "name":  "Goal",
+                               "size":  [
+                                            8,
+                                            2,
+                                            2
+                                        ],
+                               "position":  [
+                                                0,
+                                                1,
+                                                -19
+                                            ]
+                           },
+                  "killPlane":  {
+                                    "name":  "KillPlane",
+                                    "size":  [
+                                                 80,
+                                                 1,
+                                                 80
+                                             ],
+                                    "position":  [
+                                                     0,
+                                                     -8,
+                                                     -8
+                                                 ]
+                                }
+              }
 }

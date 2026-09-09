@@ -1,0 +1,27 @@
+{
+  "runId": "2026-09-09-repository-preparation",
+  "kind": "repository-preparation",
+  "checks": {
+    "jsonValidation": "PASS",
+    "acceptanceContract": "PASS",
+    "unauthorizedProtectedChange": "BLOCKED_AS_EXPECTED",
+    "authorizedBuildCheck": "PASS",
+    "rojoBuild": "PASS",
+    "builtArtifactBytes": 13598,
+    "baselineGeometry": {
+      "landingZ": -16,
+      "checkpointZ": -13,
+      "goalZ": -19
+    },
+    "gameSpecContainsAcceptance": false
+  },
+  "runtimeRegression": {
+    "status": "BLOCKED",
+    "studioId": null,
+    "rojoServeStarted": true,
+    "rojoServeStopped": true,
+    "reason": "After Studio restart, list_roblox_studios returned no registered instances. A Rojo-built temporary place also failed to register with the official MCP, so preflight and gameplay could not be attributed to the current filesystem revision."
+  },
+  "commit": null,
+  "verdict": "STATIC_GREEN_RUNTIME_BLOCKED"
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "testId": "micro_obby_jump_v0",
+  "harnessVersion": "0.1",
+  "requiresCheckpoint": true,
+  "requiresGoal": true,
+  "maxDeaths": 0,
+  "maxElapsedSeconds": 30,
+  "maxActiveErrors": 0,
+  "gameplayInputMode": "keyboard_mouse_only",
+  "requiredConsoleMarkers": [
+    "TEST_HOOKS_READY micro_obby_jump_v0",
+    "FACTORY_MICRO_OBBY_READY micro_obby_jump_v0",
+    "TEST_RUN_STARTED",
+    "TEST_CHECKPOINT_REACHED",
+    "TEST_GOAL_REACHED"
+  ]
+}

@@ -33,7 +33,7 @@ local dz = a.Z - b.Z
 return math.sqrt(dx * dx + dz * dz)
 end
 
-function TestHooks.start(spec, world)
+function TestHooks.start(spec, acceptance, world)
 if not spec.test.enabled then
 return nil
 end
@@ -48,7 +48,7 @@ state.Name = "TestState"
 state.Parent = ReplicatedStorage
 
 state:SetAttribute("testId", spec.id)
-state:SetAttribute("harnessVersion", "0.1")
+state:SetAttribute("harnessVersion", acceptance.harnessVersion)
 
 state:SetAttribute("checkpointReached", false)
 state:SetAttribute("goalReached", false)
@@ -74,12 +74,17 @@ state:SetAttribute("activeErrors", 0)
 
 state:SetAttribute(
 "maxElapsedSeconds",
-spec.acceptance.maxElapsedSeconds
+acceptance.maxElapsedSeconds
 )
 
 state:SetAttribute(
 "maxDeaths",
-spec.acceptance.maxDeaths
+acceptance.maxDeaths
+)
+
+state:SetAttribute(
+"maxActiveErrors",
+acceptance.maxActiveErrors
 )
 
 local hooksStartedAt = os.clock()
@@ -183,7 +188,7 @@ if not playerFromHit(hit) then
 return
 end
 
-if spec.acceptance.requiresCheckpoint
+if acceptance.requiresCheckpoint
 and not state:GetAttribute("checkpointReached") then
 return
 end
