@@ -1,1 +1,0 @@
-print('ROJO_SYNC_VERIFIED')
